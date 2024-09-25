@@ -109,39 +109,39 @@ def sumar_like(post : Post):
 
 
 
-#test likes
 
-POST_ID = "posts:post1"
+
+#test likes hardcodeado
+POST_ID = "post:post1"
 TOTAL_LIKES = 10000  # Número total de likes a simular
 THREADS = 11       # Número de threads simulando usuarios concurrentes
+def test():
 
+# Inicializa el contador de likes en la publicación
+    client.hset(POST_ID, "likes", 0)
+
+    # Crea los threads
+    start_time = time.time()
+    threads = []
+    for _ in range(THREADS):
+        thread = threading.Thread(target=increment_likes)
+        threads.append(thread)
+        thread.start()
+
+    # Espera a que todos los threads finalicen
+    for thread in threads:
+        thread.join()
+
+    end_time = time.time()
+
+    # Imprime el resultado final
+    likes = client.hget(POST_ID, "likes")
+    print(f"Total likes: {int(likes)}")
+    print(f"Tiempo total de prueba: {end_time - start_time} segundos")
 
 # Función para incrementar los likes
 def increment_likes():
     for _ in range(TOTAL_LIKES // THREADS):
         client.hincrby(POST_ID, "likes", 1)
 
-# Inicializa el contador de likes en la publicación
-client.hset(POST_ID, "likes", 0)
-
-# Crea los threads
-start_time = time.time()
-threads = []
-for _ in range(THREADS):
-    thread = threading.Thread(target=increment_likes)
-    threads.append(thread)
-    thread.start()
-
-# Espera a que todos los threads finalicen
-for thread in threads:
-    thread.join()
-
-end_time = time.time()
-
-# Imprime el resultado final
-likes = client.hget(POST_ID, "likes")
-print(f"Total likes: {int(likes)}")
-print(f"Tiempo total de prueba: {end_time - start_time} segundos")
-
-
-
+test()
